@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import seaborn as sn
 import matplotlib.pyplot as plt
 
 
@@ -25,7 +26,6 @@ df.dropna(
 
 print(df)
 
-
 #creat new columns "year" and "month"
 df['year'] = pd.DatetimeIndex(df['event_date']).year
 df['month'] = pd.DatetimeIndex(df['event_date']).month
@@ -42,12 +42,38 @@ print(df.dtypes)
 
 from sklearn.preprocessing import LabelEncoder
 
+#Simple numerical encoding
 lb_make = LabelEncoder()
 df["landslide_category_code"] = lb_make.fit_transform(df["landslide_category"])
 df["landslide_trigger_code"] = lb_make.fit_transform(df["landslide_trigger"])
 df["landslide_size_code"] = lb_make.fit_transform(df["landslide_size"])
 
+#Binary encoding so can use polynomial features WIP
+from sklearn.preprocessing import OneHotEncoder
+
+#enc = OneHotEncoder(handle_unknown='ignore')
+
+#oe_results = enc.fit_transform(df[["landslide_size"]])
+#oe_results = enc.fit_transform(df[["landslide_trigger"]])
+
+#df = df.join(pd.DataFrame(oe_results.toarray(), columns=enc.categories_))
+
+import pandas_profiling
+#df.profile_report()
+
+#profile = df.profile_report()
+#profile.to_file("name.html")
+
+#print(df.profile_report())
+
 print(df)
+
+corrMatrix = df.corr()
+#print (corrMatrix)
+
+sn.heatmap(corrMatrix, annot=True)
+plt.show()
+
 
 
 
