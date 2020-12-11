@@ -1,0 +1,62 @@
+import numpy as np
+import pandas as pd
+import seaborn as sn
+import matplotlib.pyplot as plt
+import geopandas as gpd
+import datetime as dt
+from matplotlib.dates import date2num
+
+df = pd.read_csv("landslides.csv")
+
+#drop unused columns
+df.drop(columns=['source_name', 'source_link', 'event_id', 'event_time', 'event_title','event_description', 'location_description',
+                    'location_accuracy', 'landslide_setting', 'injury_count', 'storm_name', 'photo_link', 'notes', 'event_import_source', 'event_import_id',
+                    'country_name', 'country_code', 'admin_division_name', 'gazeteer_closest_point', 'submitted_date', 'submitted_date', 'created_date', 'last_edited_date',],
+                    axis=1, inplace= True)
+
+#remove any rows that have NaN
+df.dropna(
+    axis=0,
+    how='any',
+    thresh=None,
+    subset=None,
+    inplace=True
+)
+
+df.drop(columns=['landslide_category', 'landslide_trigger', 'landslide_size', 'fatality_count', 
+    'admin_division_population', 'gazeteer_distance', 'longitude', 'latitude'],axis=1, inplace= True)
+
+
+#print(df.dtypes)
+
+df.insert(1, 'landslides', 'event')
+
+df['month_year'] = pd.to_datetime(df['event_date']).dt.to_period('Y')
+print(df.head())
+
+data = df.groupby(["month_year","landslides"]).size()
+print(data)
+
+# set width of bar
+barWidth = 0.25
+
+# set height of bar
+bars1 = data.loc[(data.index.get_level_values('landslides') =="event")].values
+
+# Set position of bar on X axis
+r1 = np.arange(len(bars1))
+
+# Make the plot
+plt.bar(r1, bars1, color='#7f6d5f', width=barWidth, edgecolor='white', label='Unique Events')
+
+# Add xticks on the middle of the group bars
+plt.xlabel('group', fontweight='bold')
+plt.xticks([r + barWidth for r in range(len(bars1))], data.index.get_level_values('month_year').unique())
+
+# Create legend & Show graphic
+plt.legend()
+plt.xlabel("Date")
+plt.ylabel("Unique Events Count")
+plt.show()
+
+
