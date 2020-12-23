@@ -10,7 +10,10 @@ from sklearn import datasets, linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_absolute_error
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 df = pd.read_csv("landslides.csv")
 
 #drop unused columns
@@ -37,43 +40,48 @@ df.drop(columns=['landslide_category', 'landslide_trigger', 'landslide_size', 'f
 df.insert(1, 'landslides', 'event')
 
 df['month_year'] = pd.to_datetime(df['event_date']).dt.to_period('Y')
-print(df.head())
+#print(df.head())
 
 data = df.groupby(["month_year","landslides"],as_index=False).size()
-print(data)
+
+#print(data)
 
 # Boiler plate for Linear regression used from this example for conveniece: 
 # https://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html
 
+
 #insert years seperately as there is a tough type error bug
 data.insert(1, 'years', [1988, 1993, 1995, 1996, 1997, 1998, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
     2010, 2011, 2012, 2013, 2014, 2015, 2016], allow_duplicates = False)
-print(data)
 
 x = data['years'].values.reshape(-1,1)
 y = data['size']
-print(df.dtypes)
-x_train, x_test, y_train, y_test = train_test_split(x, y,test_size=0.2)
 
+print(df.dtypes)
+# train test split
+x_train, x_test, y_train, y_test = train_test_split(x, y,test_size=0.2)
 # model training
 regr = linear_model.LinearRegression()
-regr.fit(x_train, y_train)
-
-y_pred = regr.predict(x)
+fitted = regr.fit(x_train, y_train)
+y_pred = fitted.predict(x_test)
 
 #model score
 print(regr.score(x_train, y_train)) 
-
 print(regr.score(x_test, y_test))
-
 print(regr.score(x,y))
+print('\n')
+print(mean_squared_error(y_test, y_pred))
+print(mean_squared_error(y_train, y_train))
+print('\n')
+print(mean_absolute_error(y_test, y_pred))
 
 # plotting
 years = mdates.YearLocator()   # every year
 
-plt.scatter(x, y,  color='black', label='Total Events per Year')
-plt.plot(x, y_pred, color='blue', linewidth=3, label='Linear Regression Prediction')
-plt.legend()
-plt.title("Quantity of Unique Events per Year with Predcition")
-print(data['size'])
-plt.show()
+#plt.scatter(x, y,  color='black', label='Total Events per Year')
+#plt.plot(x, y_pred, color='blue', linewidth=3, label='Linear Regression Prediction')
+#plt.legend()
+#plt.title("Quantity of Unique Events per Year with Predcition")
+#print(data['size'])
+#plt.show()
+
